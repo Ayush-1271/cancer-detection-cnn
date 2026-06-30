@@ -1,106 +1,61 @@
-# Cancer Detection using CNN — Histopathological Images
+# Cancer Detection CNN — Lung Histopathology
 
-> **Assignment Submission — VIT Bhopal**
-
-| Field | Details |
-|---|---|
-| **Name** | Ayush Ranjan |
-| **Roll No** | 23MIP10135 |
-| **Branch** | MIP |
-| **Institute** | VIT Bhopal |
-
----
-
-## Project Overview
-
-This project implements a **Cancer Detection and Classification system** using a custom deep Convolutional Neural Network (CNN) trained on histopathological images from the **Lung and Colon Cancer Histopathological Images** dataset on Kaggle.
-
-The model classifies tissue images into 5 cancer/benign categories, achieving high accuracy and AUC scores — critical metrics for medical diagnostic systems.
-
----
-
-## Dataset
-
-**Lung and Colon Cancer Histopathological Images**
-- Source: [Kaggle — andrewmvd/lung-and-colon-cancer-histopathological-images](https://www.kaggle.com/datasets/andrewmvd/lung-and-colon-cancer-histopathological-images)
-- 25,000 images (5,000 per class)
-- Original size: 768×768 px (resized to 150×150 for training)
-
-**Classes:**
-| Label | Description |
-|---|---|
-| `lung_aca` | Lung Adenocarcinoma (malignant) |
-| `lung_n` | Lung Benign Tissue (normal) |
-| `lung_scc` | Lung Squamous Cell Carcinoma (malignant) |
-| `colon_aca` | Colon Adenocarcinoma (malignant) |
-| `colon_n` | Colon Benign Tissue (normal) |
-
----
-
-## CNN Architecture
-
-```
-Input (150×150×3)
-    ↓
-Block 1: Conv2D(32) × 2 → BatchNorm → MaxPool → Dropout(0.2)
-    ↓
-Block 2: Conv2D(64) × 2 → BatchNorm → MaxPool → Dropout(0.25)
-    ↓
-Block 3: Conv2D(128) × 3 → BatchNorm → MaxPool → Dropout(0.3)
-    ↓
-Block 4: Conv2D(256) × 3 → BatchNorm → MaxPool → Dropout(0.35)
-    ↓
-Block 5: Conv2D(512) × 2 → BatchNorm → MaxPool → Dropout(0.35)
-    ↓
-GlobalAveragePooling2D
-    ↓
-Dense(1024) → BatchNorm → Dropout(0.5)
-    ↓
-Dense(512) → Dropout(0.4)
-    ↓
-Dense(5, softmax)
-```
-
----
-
-## Training Details
-
-| Parameter | Value |
-|---|---|
-| Optimizer | Adam (lr=1e-3) |
-| Loss | Categorical Crossentropy |
-| Batch Size | 64 |
-| Max Epochs | 50 (EarlyStopping) |
-| Image Size | 150×150 |
-| Split | 70% train / 15% val / 15% test |
-| Augmentation | 90° rotation, H/V flip, zoom, brightness, reflect padding |
-
-**Medical imaging note:** Augmentation is conservative (no distortion) to preserve tissue morphology for accurate diagnosis.
-
----
-
-## How to Run
-
-1. Open `3_Cancer_Detection_CNN.ipynb` in [Google Colab](https://colab.research.google.com)
-2. Set runtime to **GPU** (Runtime → Change runtime type → T4 GPU)
-3. Run all cells — Kaggle API is pre-configured in the notebook
-
----
-
-## Files
-
-```
-├── 3_Cancer_Detection_CNN.ipynb    # Main Colab notebook
-└── README.md
-```
-
----
+**Ayush Ranjan | 23MIP10135 | VIT Bhopal**
 
 ## Results
+| Metric | Score |
+|---|---|
+| Test Accuracy | **96.98%** |
+| Test AUC | **0.9963** |
+| Top-2 Accuracy | **100.00%** |
+| Parameters | 6,515,107 |
 
-The model outputs:
-- Test accuracy, AUC score, Top-2 accuracy
-- Training curves (accuracy, loss, AUC)
-- Confusion matrix (5×5)
-- Per-class classification report
-- Sample histopathology predictions
+## Dataset
+- **Source:** [Lung and Colon Cancer Histopathological Images](https://www.kaggle.com/datasets/andrewmvd/lung-and-colon-cancer-histopathological-images) — Kaggle
+- **Classes:** 3 lung cancer types · **Total:** 15,000 images
+- **Split:** 70% train / 15% val / 15% test
+- **Image size:** 96 × 96 px
+
+### Classes
+| Class | Description |
+|---|---|
+| `lung_aca` | Lung Adenocarcinoma |
+| `lung_n` | Normal Lung Tissue |
+| `lung_scc` | Lung Squamous Cell Carcinoma |
+
+### Per-Class Performance
+| Class | Precision | Recall | F1 |
+|---|---|---|---|
+| lung_aca | 0.96 | 0.95 | 0.95 |
+| lung_n | 1.00 | 1.00 | 1.00 |
+| lung_scc | 0.95 | 0.96 | 0.96 |
+
+## Architecture — Deep CNN (5 Conv Blocks)
+```
+Input (96×96×3)
+├── Block 1: Conv2D(32)×2  → BatchNorm → MaxPool → Dropout(0.20)
+├── Block 2: Conv2D(64)×2  → BatchNorm → MaxPool → Dropout(0.25)
+├── Block 3: Conv2D(128)×2 → BatchNorm → MaxPool → Dropout(0.30)
+├── Block 4: Conv2D(256)×2 → BatchNorm → MaxPool → Dropout(0.30)
+├── Block 5: Conv2D(512)   → BatchNorm            → Dropout(0.30)
+├── GlobalAveragePooling2D
+├── Dense(1024) → BatchNorm → Dropout(0.50)
+├── Dense(512)  → Dropout(0.40)
+└── Dense(3, softmax)
+```
+All Conv layers: ReLU · same-padding · L2(1e-4) regularization
+
+## Training Config
+| Setting | Value |
+|---|---|
+| Optimizer | Adam (lr=1e-3, EarlyStopping patience=8) |
+| Batch Size | 64 |
+| Pipeline | tf.data with image caching |
+| Augmentation | rotation 90°, h/v flip, brightness, contrast |
+| Framework | TensorFlow 2.20 / Keras |
+| Hardware | Google Colab T4 GPU |
+
+## How to Run
+1. Open `3_Cancer_Detection_CNN.ipynb` in [Google Colab](https://colab.research.google.com)
+2. Set runtime → **T4 GPU**
+3. Run all cells top to bottom
